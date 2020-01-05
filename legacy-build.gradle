@@ -1,22 +1,5 @@
 sourceCompatibility = JavaVersion.VERSION_1_8
 
-gradlePlugin {
-    testSourceSets sourceSets.test, sourceSets.integTest
-
-    plugins {
-        cpd {
-            id = "de.aaschmid.cpd"
-            implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
-        }
-        // Note: comment out for "publishPlugins" because old plugin ids are no longer supported
-        //       but working while downloading plugin from MavenCentral
-        legacyCpd {
-            id = "cpd"
-            implementationClass = "de.aaschmid.gradle.plugins.cpd.CpdPlugin"
-        }
-    }
-}
-
 // -- sign and publish artifacts -------------------------------------------------------------------------------------
 
 // Steps:
