@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -72,6 +73,15 @@ tasks {
                     "Implementation-Version" to project.version,
                     "Implementation-Vendor" to "Andreas Schmid, service@aaschmid.de"
             )
+        }
+    }
+
+    test {
+        ignoreFailures = isBuildOnJenkins
+
+        useJUnitPlatform()
+        testLogging {
+            exceptionFormat = TestExceptionFormat.FULL
         }
     }
 }
