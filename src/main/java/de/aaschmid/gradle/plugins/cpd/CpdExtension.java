@@ -1,7 +1,12 @@
 package de.aaschmid.gradle.plugins.cpd;
 
-import org.gradle.api.plugins.quality.CodeQualityExtension;
+import javax.inject.Inject;
 
+import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.plugins.quality.CodeQualityExtension;
+import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
+import org.gradle.api.provider.ProviderFactory;
 
 /**
  * Configuration options for the CPD plugin.
@@ -23,7 +28,7 @@ import org.gradle.api.plugins.quality.CodeQualityExtension;
  */
 public class CpdExtension extends CodeQualityExtension {
 
-    private String encoding = System.getProperty("file.encoding");
+    private final Property<String> encoding;
     private boolean ignoreAnnotations = false;
     private boolean ignoreIdentifiers = false;
     private boolean ignoreLiterals = false;
@@ -34,6 +39,11 @@ public class CpdExtension extends CodeQualityExtension {
     private boolean skipBlocks = true;
     private String skipBlocksPattern = "#if 0|#endif";
 
+    @Inject
+    public CpdExtension(ObjectFactory objectFactory, ProviderFactory providerFactory) {
+        encoding = objectFactory.property(String.class).value(providerFactory.provider(() -> System.getProperty("file.encoding")));
+    }
+
     /**
      * The character set encoding (e.g., UTF-8) to use when reading the source code files but also when producing the report; defaults to
      * {@code System.getProperty("file.encoding")}.
@@ -42,12 +52,8 @@ public class CpdExtension extends CodeQualityExtension {
      *
      * @return the charset encoding
      */
-    public String getEncoding() {
+    public Property<String> getEncoding() {
         return encoding;
-    }
-
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
     }
 
     /**

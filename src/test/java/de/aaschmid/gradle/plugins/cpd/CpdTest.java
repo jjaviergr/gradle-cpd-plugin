@@ -79,7 +79,7 @@ class CpdTest {
             task.setDescription("Execute me!");
             task.setGroup("check");
 
-            task.setEncoding("ISO-8859-1");
+            task.getEncoding().set("ISO-8859-1");
             task.setIgnoreAnnotations(true);
             task.setIgnoreFailures(true);
             task.setIgnoreIdentifiers(true);
@@ -95,7 +95,7 @@ class CpdTest {
 
         // Then:
         Cpd actual = cpdCheck.get();
-        assertThat(actual.getEncoding()).isEqualTo("ISO-8859-1");
+        assertThat(actual.getEncoding().get()).isEqualTo("ISO-8859-1");
         assertThat(actual.getIgnoreAnnotations()).isTrue();
         assertThat(actual.getIgnoreFailures()).isTrue();
         assertThat(actual.getIgnoreIdentifiers()).isTrue();
@@ -192,13 +192,13 @@ class CpdTest {
     @Test
     void Cpd_shouldThrowInvalidUserDataExceptionIfEncodingIsNull(TaskProvider<Cpd> cpdCheck) {
         // Given:
-        cpdCheck.configure(task -> task.setEncoding(null));
+        cpdCheck.configure(task -> task.getEncoding().set((String) null));
         Cpd actual = cpdCheck.get();
 
         // Expect:
         assertThatThrownBy(() -> actual.getActions().forEach(a -> a.execute(actual)))
                 .isInstanceOf(InvalidUserDataException.class)
-                .hasMessage("Task 'cpdCheck' requires 'encoding' but was: null.");
+                .hasMessage("Task 'cpdCheck' requires 'encoding' but was not set and default could not be retrieved.");
     }
 
     @Test
@@ -246,7 +246,7 @@ class CpdTest {
     @MethodSource
     void getXmlRendererEncoding(String taskEncoding, String reportEncoding, String expected, TaskProvider<Cpd> cpdCheck) {
         // Given:
-        cpdCheck.configure(task -> task.setEncoding(taskEncoding));
+        cpdCheck.configure(task -> task.getEncoding().set(taskEncoding));
 
         CpdXmlFileReportImpl report = new CpdXmlFileReportImpl("xml", cpdCheck.get());
         report.setEncoding(reportEncoding);

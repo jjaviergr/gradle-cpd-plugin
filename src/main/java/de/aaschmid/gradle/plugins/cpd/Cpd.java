@@ -15,6 +15,9 @@ import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.internal.CollectionCallbackActionDecorator;
+import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.provider.Property;
+import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.reporting.Reporting;
 import org.gradle.api.reporting.SingleFileReport;
 import org.gradle.api.tasks.CacheableTask;
@@ -72,9 +75,10 @@ import org.gradle.workers.WorkerExecutor;
 public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdReports> {
 
     private final WorkerExecutor workerExecutor;
+    private ProviderFactory providerFactory;
     private final CpdReportsImpl reports;
 
-    private String encoding;
+    private final Property<String> encoding;
     private boolean ignoreAnnotations;
     private boolean ignoreFailures;
     private boolean ignoreIdentifiers;
@@ -89,9 +93,12 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
 
 
     @Inject
-    public Cpd(CollectionCallbackActionDecorator callbackActionDecorator, Instantiator instantiator, WorkerExecutor workerExecutor) {
+    public Cpd(CollectionCallbackActionDecorator callbackActionDecorator, Instantiator instantiator, WorkerExecutor workerExecutor, ObjectFactory objectFactory, ProviderFactory providerFactory) {
         this.reports = instantiator.newInstance(CpdReportsImpl.class, this, callbackActionDecorator);
         this.workerExecutor = workerExecutor;
+        this.providerFactory = providerFactory;
+
+        this.encoding = objectFactory.property(String.class);
     }
 
     @TaskAction
@@ -104,8 +111,10 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     }
 
     private void checkTaskState() {
-        if (getEncoding() == null) {
-            throw new InvalidUserDataException(String.format("Task '%s' requires 'encoding' but was: %s.", getName(), getEncoding()));
+        if (!getEncoding().isPresent()) {
+            throw new InvalidUserDataException(String.format(
+                    "Task '%s' requires 'encoding' but was not set and default could not be retrieved.",
+                    getName()));
         }
         if (getMinimumTokenCount() <= 0) {
             throw new InvalidUserDataException(String.format("Task '%s' requires 'minimumTokenCount' to be greater than zero.", getName()));
@@ -167,11 +176,11 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
     // VisibleForTesting
     String getXmlRendererEncoding(CpdXmlFileReport report) {
         String encoding = report.getEncoding();
-        if (encoding == null) {
-            encoding = getEncoding();
+        if (encoding == null && getEncoding().isPresent()) {
+            encoding = getEncoding().get();
         }
         if (encoding == null) {
-            encoding = System.getProperty("file.encoding");
+            encoding = providerFactory.provider(() -> System.getProperty("file.encoding")).get();
         }
         return encoding;
     }
@@ -211,12 +220,8 @@ public class Cpd extends SourceTask implements VerificationTask, Reporting<CpdRe
      * @return the charset encoding
      */
     @Input
-    public String getEncoding() {
+    public Property<String> getEncoding() {
         return encoding;
-    }
-
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
     }
 
     /**

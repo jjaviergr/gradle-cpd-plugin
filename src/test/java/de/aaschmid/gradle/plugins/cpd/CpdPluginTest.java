@@ -47,7 +47,7 @@ class CpdPluginTest {
 
     @Test
     void CpdPlugin_shouldCreateAndConfigureCpdExtension(CpdExtension cpd) {
-        assertThat(cpd.getEncoding()).isEqualTo(System.getProperty("file.encoding"));
+        assertThat(cpd.getEncoding().get()).isEqualTo(System.getProperty("file.encoding"));
         assertThat(cpd.isIgnoreAnnotations()).isFalse();
         assertThat(cpd.isIgnoreIdentifiers()).isFalse();
         assertThat(cpd.isIgnoreFailures()).isFalse();
@@ -80,7 +80,7 @@ class CpdPluginTest {
         assertThat(t.getDescription()).isEqualTo("Run CPD analysis for all sources");
         assertThat(t.getGroup()).isNull();
 
-        assertThat(t.getEncoding()).isEqualTo(System.getProperty("file.encoding"));
+        assertThat(t.getEncoding().get()).isEqualTo(System.getProperty("file.encoding"));
         assertThat(t.getIgnoreAnnotations()).isFalse();
         assertThat(t.getIgnoreFailures()).isFalse();
         assertThat(t.getIgnoreIdentifiers()).isFalse();
@@ -116,7 +116,7 @@ class CpdPluginTest {
         assertThat(t.getDescription()).isNull();
         assertThat(t.getGroup()).isNull();
 
-        assertThat(t.getEncoding()).isEqualTo(System.getProperty("file.encoding"));
+        assertThat(t.getEncoding().get()).isEqualTo(System.getProperty("file.encoding"));
         assertThat(t.getIgnoreAnnotations()).isFalse();
         assertThat(t.getIgnoreFailures()).isFalse();
         assertThat(t.getIgnoreIdentifiers()).isFalse();
@@ -273,7 +273,7 @@ class CpdPluginTest {
     @Test
     void CpdPlugin_shouldAllowConfigureCpdCheckTaskViaCpdExtension(Project project, CpdExtension cpd, TaskProvider<Cpd> cpdCheck) {
         // Given:
-        cpd.setEncoding("UTF-8");
+        cpd.getEncoding().set("UTF-8");
         cpd.setIgnoreAnnotations(true);
         cpd.setIgnoreFailures(true);
         cpd.setIgnoreIdentifiers(true);
@@ -290,7 +290,7 @@ class CpdPluginTest {
         Cpd task = cpdCheck.get();
 
         // Then:
-        assertThat(task.getEncoding()).isEqualTo("UTF-8");
+        assertThat(task.getEncoding().get()).isEqualTo("UTF-8");
         assertThat(task.getIgnoreAnnotations()).isTrue();
         assertThat(task.getIgnoreFailures()).isTrue();
         assertThat(task.getIgnoreIdentifiers()).isTrue();
